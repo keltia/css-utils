@@ -120,13 +120,15 @@ def process_url(ctx, url)
   if url !~ %r{^http}
     url = 'http://' + url
   end
-  print("URL: #{url}:")
+  $stderr.print("URL: #{url}:")
   ret = blocked_url?(ctx, url)
   if ret.nil?
-    puts('UNKNOWN')
-  elsif
-    puts(ret)
+    $stderr.puts('UNKNOWN')
+  elsif ret == 'BLOCKED-EEC'
+    $stderr.puts(ret)
+    return nil
   end
+  ret
 end
 
 def analyse_entries(ctx, name)
@@ -150,7 +152,7 @@ end
 
 def gen_mail_paths(paths)
   if paths.length != 0
-    list = paths.collect {|p| p + "\n"}.join("\n")
+    list = paths.join("\n")
     str = <<-"EOTEXT"
 Can you open a ticket to add these filenames to the BLOCKED list?
 
@@ -165,10 +167,10 @@ end
 
 def gen_mail_urls(urls)
   if urls.length != 0
-    list = urls.collect {|u| u + "\n"}.join("\n")
+    list = urls.join("\n")
     str = <<"EOTEXT"
 Can you open a ticket to add these URLs to the BLOCKED list on BlueCoat?
-  
+
 #{list}
 EOTEXT
   str
