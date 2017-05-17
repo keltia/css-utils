@@ -97,7 +97,7 @@ def blocked_url?(ctx, url)
                        :timeout => 5,
                        :agent_name => "git/#{ID}")
     c.set_proxy_auth(ctx.username, ctx.password)
-    resp = c.head(url)
+    resp = c.head(url,  :follow_redirect => true)
     if resp.status == 200
       '**BLOCK**'
     elsif resp.status == 302
