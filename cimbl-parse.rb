@@ -117,15 +117,62 @@ end
 
 def analyse_entries(ctx, name)
   cnt = 0
+  paths = []
+  urls = []
   CSV.foreach(name) do |e|
     cnt += 1
     if e[2] =~ %r{^filename\|}
-      ctx.paths << process_path(e[5])
+      paths << process_path(e[5])
     elsif e[2] == 'url'
-      ctx.urls << process_url(ctx, e[5])
+      urls << process_url(ctx, e[5])
     end
   end
+  ctx.urls = urls.compact.uniq
+  ctx.paths = paths.compact.uniq
+
   cnt
+end
+
+
+def gen_mail_paths(paths)
+  if paths.length != 0
+    list = paths.collect {|p| p + "\n"}
+    str = <<-"EOTEXT"
+Can you open a ticket to add these filenames to the BLOCKED list?
+
+#{list}
+EOTEXT
+  str
+  else
+    ''
+  end
+end
+
+
+def gen_mail_urls(urls)
+  if urls.length != 0
+    list = urls.collect {|u| u + "\n"}
+    str = <<"EOTEXT"
+Can you open a ticket to add these URLs to the BLOCKED list on BlueCoat?
+  
+#{list}
+EOTEXT
+  str
+  else
+    ''
+  end
+end
+
+def gen_mail(ctx)
+  body = <<-"EOTEXT"
+
+Dear Service Desk,
+  
+#{gen_mail_paths(ctx.paths)}
+
+#{gen_mail_urls(ctx.urls)}
+  EOTEXT
+  body
 end
 
 def main(argv)
@@ -133,26 +180,44 @@ def main(argv)
   #
   ctx = Ctx.new
 
+
+
   name = argv[0]
   if right_name?(name)
     $stderr.puts("Reading #{name}")
     $stderr.printf("Using proxy %s\n", PROXY_ERC)
 
+    # Read everything
+    #
     cnt = analyse_entries(ctx, name)
-    urls = ctx.urls.compact.uniq
-    paths = ctx.paths.compact.uniq
+
+    # Now act
+    #
+    urls = ctx.urls
+    paths = ctx.paths
 
     puts(urls)
     puts "======"
     puts(paths)
-    printf("%d lines read, %d urls, %d filepaths\n", cnt, urls.length, paths.length)
+
+    printf("%d lines read, %d urls, %d filepaths\n", cnt,
+           urls.length,
+           paths.length)
   else
     $stderr.printf("Wrong filename %s", name)
     exit 1
   end
 
-  # Go forth with the file
-
+  # Generate a mail with info
+  #
+  if paths.length != 0 || urls.length != 0
+    str = gen_mail(ctx)
+    puts(str)
+  else
+    # Or not
+    #
+    puts "Nothing new"
+  end
 end
 
 if $0 == __FILE__
