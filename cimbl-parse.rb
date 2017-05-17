@@ -143,8 +143,8 @@ def analyse_entries(ctx, name)
       urls << process_url(ctx, e[5])
     end
   end
-  ctx.urls = urls.compact.uniq
-  ctx.paths = paths.compact.uniq
+  ctx.urls = urls.uniq.compact
+  ctx.paths = paths.uniq.compact
 
   cnt
 end
