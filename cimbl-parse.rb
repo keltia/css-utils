@@ -82,7 +82,7 @@ def process_path(path)
 
   # Remove the signature
   #
-  file, sig = path.split('|')
+  file  = path.split('|')[0]
 
   # These exts are already blocked
   #
