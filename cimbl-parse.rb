@@ -136,7 +136,7 @@ end
 
 def gen_mail_paths(paths)
   if paths.length != 0
-    list = paths.collect {|p| p + "\n"}
+    list = paths.collect {|p| p + "\n"}.join("\n")
     str = <<-"EOTEXT"
 Can you open a ticket to add these filenames to the BLOCKED list?
 
@@ -151,7 +151,7 @@ end
 
 def gen_mail_urls(urls)
   if urls.length != 0
-    list = urls.collect {|u| u + "\n"}
+    list = urls.collect {|u| u + "\n"}.join("\n")
     str = <<"EOTEXT"
 Can you open a ticket to add these URLs to the BLOCKED list on BlueCoat?
   
