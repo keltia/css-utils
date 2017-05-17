@@ -95,7 +95,7 @@ def blocked_url?(ctx, url)
   begin
     c = HTTPClient.new(:proxy => PROXY_ERC,
                        :timeout => 5,
-                       :agent_name => 'git/0.0.0-eec')
+                       :agent_name => "git/#{ID}")
     c.set_proxy_auth(ctx.username, ctx.password)
     resp = c.head(url)
     if resp.status == 200
