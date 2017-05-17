@@ -187,6 +187,8 @@ Dear Service Desk,
 #{gen_mail_paths(ctx.paths)}
 
 #{gen_mail_urls(ctx.urls)}
+Best regards,
+Your friendly script — #{MYNAME}/#{ID}
   EOTEXT
   body
 end
