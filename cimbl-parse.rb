@@ -5,8 +5,16 @@
 #
 
 require 'csv'
-require 'httpclient'
+require 'optparse'
+
 require 'dbi/dbrc'
+require 'gettext'
+require 'httpclient'
+
+# Global data
+#
+MYNAME = File.basename($0)
+ID = "0.0.1"
 
 # Extensions already blocked
 # cf. https://coll.eurocontrol.int/sites/InfoSec/SitePages/FAQMF.aspx
