@@ -43,9 +43,15 @@ class Ctx
   attr_reader :password
   attr_reader :domain
 
+  attr_accessor :opt_p
+  attr_accessor :opt_u
+
   def initialize
     @paths = []
     @urls = []
+    @opt_p = false
+    @opt_u = false
+
     get_password
   end
 
@@ -129,9 +135,9 @@ def analyse_entries(ctx, name)
   urls = []
   CSV.foreach(name) do |e|
     cnt += 1
-    if e[2] =~ %r{^filename\|}
+    if (e[2] =~ %r{^filename\|} && ctx.opt_p == false)
       paths << process_path(e[5])
-    elsif e[2] == 'url'
+    elsif (e[2] == 'url' && ctx.opt_u == false)
       urls << process_url(ctx, e[5])
     end
   end
@@ -188,9 +194,44 @@ def main(argv)
   #
   ctx = Ctx.new
 
+  # CLI options
+  #
+  GetText.set_locale('En_US.UTF-8')
 
+  usage = <<-"EOTEXT"
+Usage: #{MYNAME} [-PU] FILE
+  EOTEXT
 
-  name = argv[0]
+  banner = <<-"EOTEXT"
+#{MYNAME}
+Revision #{ID}
+
+#{usage}
+  EOTEXT
+
+  argv.options do |opts|
+    opts.banner = banner
+    opts.on('-P', '--omit-paths', 'Do not look for filenames') do
+      ctx.opt_p = true
+    end
+    opts.on('-U', '--omit-urls', 'Do not look for urls') do
+      ctx.opt_u = true
+    end
+    opts.on('-h', 'Help', 'Display this usage') do
+      puts banner
+      return 0
+    end
+    opts.parse!
+  end
+
+  argv.options = nil
+  name = argv.shift
+
+  if name.nil? || name == ''
+    $stderr.puts("You must specify a file.")
+    exit 255
+  end
+
   if right_name?(name)
     $stderr.puts("Reading #{name}")
     $stderr.printf("Using proxy %s\n", PROXY_ERC)
