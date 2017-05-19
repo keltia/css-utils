@@ -98,16 +98,14 @@ def blocked_url?(ctx, url)
                        :agent_name => "git/#{ID}")
     c.set_proxy_auth(ctx.username, ctx.password)
     resp = c.head(url,  :follow_redirect => true)
-    if resp.status == 200
-      '**BLOCK**'
-    elsif resp.status == 302
+    if resp.status == 302
       "REDIRECT: %s" % resp.headers['Location']
     elsif resp.status == 403
       'BLOCKED-EEC'
     elsif resp.status == 407
       'AUTH'
     else
-      nil
+     '**BLOCK**'
     end
   rescue => err
     $stderr.puts("Error on #{url}: #{err}")
@@ -127,8 +125,11 @@ def process_url(ctx, url)
   elsif ret == 'BLOCKED-EEC'
     $stderr.puts(ret)
     return nil
+  elsif ret == '**BLOCK**'
+    $stderr.puts(ret)
+    return url
   end
-  ret
+  nil
 end
 
 def analyse_entries(ctx, name)
